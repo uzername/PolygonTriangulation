@@ -3,9 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TriangulationTest", ".\TriangulationTest\TriangulationTest.vcxproj", "{EB453484-6FEF-4649-A802-8CCE877B8E06}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphicalProjectTriangulation", "GraphicalProjectTriangulation\GraphicalProjectTriangulation.vcxproj", "{913687B0-53A7-4096-9504-93A14A4B95B7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{EB453484-6FEF-4649-A802-8CCE877B8E06} = {EB453484-6FEF-4649-A802-8CCE877B8E06}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphicalProjectTriangulation", ".\GraphicalProjectTriangulation\GraphicalProjectTriangulation.vcxproj", "{913687B0-53A7-4096-9504-93A14A4B95B7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TriangulationTest", "TriangulationTest\TriangulationTest.vcxproj", "{EB453484-6FEF-4649-A802-8CCE877B8E06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

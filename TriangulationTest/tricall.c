@@ -242,6 +242,7 @@ int main()
 
   printf("Refined triangulation:\n\n");
   report(&out, 0, 1, 0, 0, 0, 0);
+ // report(&out, 0, 1, 1, 1, 1, 1);
 
   /* Free all allocated arrays, including those allocated by Triangle. */
 
