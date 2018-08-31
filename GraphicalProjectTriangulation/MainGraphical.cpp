@@ -60,20 +60,20 @@ bool MyApp::OnInit()
     frame->Show();
 
     aFinalTriangulation = performtesttriangulation();
-    max_width = aFinalTriangulation.initialvertlist[0]; max_height = aFinalTriangulation.initialvertlist[1];
-    min_width = aFinalTriangulation.initialvertlist[0]; min_height = aFinalTriangulation.initialvertlist[1];
-    for (int i = 2; i < aFinalTriangulation.vertcount * 2; i += 2) {
-        if (max_width < aFinalTriangulation.initialvertlist[i]) {
-            max_width = aFinalTriangulation.initialvertlist[i];
+    max_width = aFinalTriangulation.initialvertlist[0][0][0]; max_height = aFinalTriangulation.initialvertlist[0][0][1];
+    min_width = aFinalTriangulation.initialvertlist[0][0][0]; min_height = aFinalTriangulation.initialvertlist[0][0][1];
+    for (int i = 2; i < aFinalTriangulation.initialvertlist[0].size(); i += 2) {
+        if (max_width < aFinalTriangulation.initialvertlist[0][i][0]) {
+            max_width = aFinalTriangulation.initialvertlist[0][i][0];
         }
-        if (max_height < aFinalTriangulation.initialvertlist[i + 1]) {
-            max_height = aFinalTriangulation.initialvertlist[i + 1];
+        if (max_height < aFinalTriangulation.initialvertlist[0][i][1]) {
+            max_height = aFinalTriangulation.initialvertlist[0][i][1];
         }
-        if (min_width > aFinalTriangulation.initialvertlist[i]) {
-            min_width = aFinalTriangulation.initialvertlist[i];
+        if (min_width > aFinalTriangulation.initialvertlist[0][i][0]) {
+            min_width = aFinalTriangulation.initialvertlist[0][i][0];
         }
-        if (min_height > aFinalTriangulation.initialvertlist[i + 1]) {
-            min_height = aFinalTriangulation.initialvertlist[i + 1];
+        if (min_height > aFinalTriangulation.initialvertlist[0][i][1]) {
+            min_height = aFinalTriangulation.initialvertlist[0][i][1];
         }
     }
 
@@ -83,11 +83,7 @@ bool MyApp::OnInit()
 
 MyApp::~MyApp()
 {
-    if (aFinalTriangulation.free_required) {
-    free(aFinalTriangulation.initialvertlist);
-    free(aFinalTriangulation.triangleindiceslist);
-    free(aFinalTriangulation.finalvertlist);
-    }
+    
 }
 
 BEGIN_EVENT_TABLE(BasicDrawPane, wxPanel)
@@ -186,41 +182,65 @@ void BasicDrawPane::render(wxDC&  dc)
     if ((max_height == min_height) || (max_width == min_width)) {
     return;
     }
-    for (int i = 0; i < aFinalTriangulation.vertcount * 2; i += 2) {
-    int begincoordinate_h = offset + int((dc_width)/scalingFactor * aFinalTriangulation.initialvertlist[i] );
-    int begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[i+1]);
+    //draw the outer contour
+    for (int i = 0; i < aFinalTriangulation.initialvertlist[0].size(); i += 1) {
+    int begincoordinate_h = offset + int((dc_width)/scalingFactor * aFinalTriangulation.initialvertlist[0][i][0] );
+    int begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[0][i][1]);
     int endcoordinate_h; int endcoordinate_v;
-    if ((i + 2 >= aFinalTriangulation.vertcount*2)||(i + 3 >= aFinalTriangulation.vertcount*2)) {
-        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[0]);
-        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[1]);
+    if (  i + 1 >= aFinalTriangulation.initialvertlist[0].size()  ) {
+        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[0][0][0]);
+        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[0][0][1]);
     } else {
-        endcoordinate_h = offset + int((dc_width ) / scalingFactor * aFinalTriangulation.initialvertlist[i + 2]);
-        endcoordinate_v = offset + int((dc_height ) / scalingFactor * aFinalTriangulation.initialvertlist[i+3]);
+        endcoordinate_h = offset + int((dc_width ) / scalingFactor * aFinalTriangulation.initialvertlist[0][i+1][0]);
+        endcoordinate_v = offset + int((dc_height ) / scalingFactor * aFinalTriangulation.initialvertlist[0][i+1][1]);
     }
     dc.DrawLine(wxPoint{begincoordinate_h, begincoordinate_v}, wxPoint{endcoordinate_h, endcoordinate_v});
     }
+    for (int i = 1; i < aFinalTriangulation.initialvertlist.size(); i += 1) {
+        for (int j = 0; j < aFinalTriangulation.initialvertlist[i].size(); j += 1) {
+            int begincoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[i][j][0]);
+            int begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[i][j][1]);
+            int endcoordinate_h; int endcoordinate_v;
+            if (j + 1 >= aFinalTriangulation.initialvertlist[i].size()) {
+                endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[i][0][0]);
+                endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[i][0][1]);
+            }
+            else {
+                endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[i][j + 1][0]);
+                endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[i][j + 1][1]);
+            }
+            dc.DrawLine(wxPoint{ begincoordinate_h, begincoordinate_v }, wxPoint{ endcoordinate_h, endcoordinate_v });
+        }
+    }
+    
     dc.SetPen(wxPen(wxColor(0, 0, 255), 1)); // 1-pixels-thick blue outline
-    for (int i = 0; i < aFinalTriangulation.triangleindiceslistcount * 3; i+=3) {
+    int i = 0;
+    while ( i < aFinalTriangulation.finalvertlist.size()-2 ) {
         int begincoordinate_h; int begincoordinate_v; int endcoordinate_h; int endcoordinate_v;
-        begincoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i]*2 ]);
-        begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i]*2+1]);
-        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i+1]*2]);
-        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i+1]*2 + 1]);
+        std::tuple<eNochka, eNochka> theTuple = getCoordinateByIndice(aFinalTriangulation.finalvertlist[i]); eNochka contour = std::get<0>(theTuple); eNochka contourItem = std::get<1>(theTuple);
+        std::tuple<eNochka, eNochka> theTuple1 = getCoordinateByIndice(aFinalTriangulation.finalvertlist[i+1]); eNochka contour1 = std::get<0>(theTuple1); eNochka contourItem1 = std::get<1>(theTuple1);
+        std::tuple<eNochka, eNochka> theTuple2 = getCoordinateByIndice(aFinalTriangulation.finalvertlist[i+2]); eNochka contour2 = std::get<0>(theTuple2); eNochka contourItem2 = std::get<1>(theTuple2);
+
+        begincoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[contour ][contourItem][0]);
+        begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[contour][contourItem][1]);
+        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[contour1][contourItem1][0]);
+        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[contour1][contourItem1][1]);
         dc.DrawText(wxT("+"), wxPoint{ begincoordinate_h, begincoordinate_v }); dc.DrawText(wxT("+"), wxPoint{ endcoordinate_h, endcoordinate_v });
         dc.DrawLine(wxPoint{ begincoordinate_h, begincoordinate_v }, wxPoint{ endcoordinate_h, endcoordinate_v });
-        begincoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i+1]*2]);
-        begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i+1]*2 + 1]);
-        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i+2]*2]);
-        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i + 2]*2 + 1]);
+        begincoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[contour1][contourItem1][0]);
+        begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[contour1][contourItem1][1]);
+        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[contour2][contourItem2][0]);
+        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[contour2][contourItem2][1]);
         dc.DrawLine(wxPoint{ begincoordinate_h, begincoordinate_v }, wxPoint{ endcoordinate_h, endcoordinate_v });
-        begincoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i]*2]);
-        begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i]*2 + 1]);
-        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i +2]*2]);
-        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.finalvertlist[aFinalTriangulation.triangleindiceslist[i +2]*2 + 1]);
+        begincoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[contour2][contourItem2][0]);
+        begincoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[contour2][contourItem2][1]);
+        endcoordinate_h = offset + int((dc_width) / scalingFactor * aFinalTriangulation.initialvertlist[contour][contourItem][0]);
+        endcoordinate_v = offset + int((dc_height) / scalingFactor * aFinalTriangulation.initialvertlist[contour][contourItem][1]);
         dc.DrawText(wxT("+"), wxPoint{ endcoordinate_h, endcoordinate_v });
         dc.DrawLine(wxPoint{ begincoordinate_h, begincoordinate_v }, wxPoint{ endcoordinate_h, endcoordinate_v });
-        
+        i+=3;
     }
+    
 #endif
 
 }
